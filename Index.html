@@ -1,0 +1,154 @@
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Desbloqueie meu Coração 💘</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(120deg,#ffccff,#ccddff);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+    text-align:center;
+  }
+  h1{color:#c0066e;margin:10px 0;font-size:1.8rem}
+  #board{
+    width:300px;height:300px;
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:2px;margin:18px 0;
+  }
+  .piece{
+    width:100%;height:100%;
+    border-radius:4px;
+    background-size:300px 300px;
+    cursor:grab;transition:filter .2s;
+  }
+  .piece.dragging{filter:brightness(0.7);cursor:grabbing}
+  #msg{font-size:1.2rem;display:none;color:#222}
+  #kiss,#next{
+    margin-top:16px;padding:12px 20px;
+    font-size:1rem;border:none;border-radius:8px;
+    color:#fff;background:#ff3366;cursor:pointer;display:none;
+  }
+  #next{background:#0066ff;margin-left:8px;}
+</style>
+</head>
+<body>
+
+<h1>Montar meu sorriso 💖</h1>
+<p id="subtitle">Arrasta as peças pra provar que me ama!</p>
+
+<div id="board"></div>
+
+<p id="msg">Parabéns! Você desbloqueou meu coração 😍</p>
+<button id="kiss" onclick="alert('Te amo! Agora me dá um beijo 😘')">Beijo?</button>
+<button id="next" onclick="nextPic()">Próxima foto ➜</button>
+
+<script>
+/* ------- fotos (ajuste os nomes se necessário) ------- */
+const pics=[
+  "foto1.jpg", // coloque aqui 1.jpg, 2.jpg... ou como preferir
+  "foto2.jpg",
+  "foto3.jpg",
+  "foto4.jpg",
+  "foto5.jpg",
+  "foto6.jpg"
+];
+
+/* ------- constantes ------- */
+const grid=3;         // 3×3 peças
+let current=0;        // índice da foto atual
+let board=document.getElementById("board");
+
+/* ------- cria o quebra-cabeça para a foto atual ------- */
+function buildPuzzle(imgSrc){
+  board.innerHTML="";
+  let order=[...Array(grid*grid).keys()]; // 0–8
+  shuffle(order);
+  order.forEach(pos=>{
+    const piece=document.createElement("div");
+    piece.className="piece";piece.draggable=true;
+    const x=-(pos%grid)*100/grid;
+    const y=-Math.floor(pos/grid)*100/grid;
+    piece.style.backgroundImage=`url('${imgSrc}')`;
+    piece.style.backgroundPosition=`${x}% ${y}%`;
+    piece.dataset.correct=pos;
+    board.appendChild(piece);
+  });
+  addDragLogic();
+  resetUI();
+}
+
+/* ------- embaralha array ------- */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+}
+
+/* ------- drag & drop ------- */
+function addDragLogic(){
+  let dragEl=null;
+  board.querySelectorAll(".piece").forEach(p=>{
+    p.addEventListener("dragstart",e=>{
+      dragEl=e.target;dragEl.classList.add("dragging");
+    });
+    p.addEventListener("dragend",e=>{
+      dragEl.classList.remove("dragging");dragEl=null;
+    });
+  });
+  board.addEventListener("dragover",e=>e.preventDefault());
+  board.addEventListener("drop",e=>{
+    if(e.target.classList.contains("piece") && dragEl){
+      const ref=e.target, clone1=dragEl.cloneNode(true), clone2=ref.cloneNode(true);
+      board.replaceChild(clone1,ref);
+      board.replaceChild(clone2,dragEl);
+      addDragLogic();      // reanexa eventos
+      checkWin();
+    }
+  });
+}
+
+/* ------- verifica vitória ------- */
+function checkWin(){
+  const ok=[...board.children].every((p,i)=>+p.dataset.correct===i);
+  if(ok){
+    document.getElementById("msg").style.display="block";
+    document.getElementById("kiss").style.display="inline-block";
+    document.getElementById("next").style.display=
+      (current<pics.length-1)?"inline-block":"none";
+  }
+}
+
+/* ------- UI helpers ------- */
+function resetUI(){
+  document.getElementById("msg").style.display="none";
+  document.getElementById("kiss").style.display="none";
+  document.getElementById("next").style.display="none";
+}
+
+/* ------- troca para a próxima foto ------- */
+function nextPic(){
+  if(current<pics.length-1){
+    current++;buildPuzzle(pics[current]);
+  }
+}
+
+/* ------- inicia ------- */
+buildPuzzle(pics[current]);
+</script>
+
+</body>
+</html>>
